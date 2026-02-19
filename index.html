@@ -1,316 +1,393 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agentic Workflow Builder – HSE Platform</title>
-  <meta name="description" content="Enterprise AI-driven workflow builder for HSE orchestration. Design, simulate and publish intelligent safety workflows." />
+  <title>nAI Agentic Workflow Builder</title>
+  <meta name="description"
+    content="Enterprise AI-driven workflow builder for HSE orchestration. Design, simulate and publish intelligent safety workflows." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/canvas.css" />
 </head>
+
 <body>
 
-<!-- ========== WORKFLOW LIST VIEW ========== -->
-<div id="workflow-list-view" class="view active">
-  <div class="list-bg-pattern"></div>
-  <div class="list-header">
-    <div class="list-brand">
-      <div class="brand-icon">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <path d="M4 14C4 8.477 8.477 4 14 4s10 4.477 10 10-4.477 10-10 10S4 19.523 4 14z" fill="url(#bg1)" opacity=".2"/>
-          <path d="M9 14l3.5 3.5L19 9" stroke="url(#stroke1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M14 2v3M14 23v3M2 14h3M23 14h3" stroke="url(#stroke1)" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
-          <defs>
-            <linearGradient id="bg1" x1="4" y1="4" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#3b82f6"/>
-              <stop offset="1" stop-color="#00d1a0"/>
-            </linearGradient>
-            <linearGradient id="stroke1" x1="4" y1="4" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#60a5fa"/>
-              <stop offset="1" stop-color="#00d1a0"/>
-            </linearGradient>
-          </defs>
-        </svg>
+  <!-- ========== WORKFLOW LIST VIEW ========== -->
+  <div id="workflow-list-view" class="view active">
+    <div class="list-bg-pattern"></div>
+    <div class="list-header">
+      <div class="list-brand">
+        <div class="brand-icon">
+          <img src="assets/logo.svg" alt="nAI Logo" width="32" height="32" />
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">nAI Agentic Workflow Builder</span>
+          <span class="brand-sub">AI-Powered Orchestration Platform</span>
+        </div>
       </div>
-      <div class="brand-text">
-        <span class="brand-name">HSE Workflow Builder</span>
-        <span class="brand-sub">AI-Powered Orchestration Platform</span>
-      </div>
-    </div>
-    <div class="list-header-actions">
-      <button class="btn btn-ghost" id="import-workflow-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Import
-      </button>
-      <button class="btn btn-primary" id="create-workflow-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New Workflow
-      </button>
-    </div>
-  </div>
-
-  <div class="list-content">
-    <div class="list-stats">
-      <div class="stat-card">
-        <div class="stat-icon stat-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-        <div><div class="stat-val" id="stat-total">0</div><div class="stat-label">Total Workflows</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon stat-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        <div><div class="stat-val" id="stat-active">0</div><div class="stat-label">Active</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon stat-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <div><div class="stat-val" id="stat-draft">0</div><div class="stat-label">Drafts</div></div>
-      </div>
-    </div>
-
-    <div class="list-section-title">
-      <span>Your Workflows</span>
-      <div class="list-filters">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="active">Active</button>
-        <button class="filter-btn" data-filter="draft">Draft</button>
-        <button class="filter-btn" data-filter="archived">Archived</button>
-      </div>
-    </div>
-
-    <div id="workflow-grid" class="workflow-grid">
-      <!-- Cards rendered by JS -->
-    </div>
-  </div>
-
-  <!-- Hidden file input for import -->
-  <input type="file" id="import-file-input" accept=".json" style="display:none" />
-</div>
-
-<!-- ========== BUILDER VIEW ========== -->
-<div id="builder-view" class="view">
-
-  <!-- TOP NAV -->
-  <nav class="topnav">
-    <div class="topnav-left">
-      <button class="topnav-back" id="back-to-list-btn" title="Back to Workflows">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div class="nav-brand-mini">
-        <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-          <path d="M9 14l3.5 3.5L19 9" stroke="url(#stroke2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <defs><linearGradient id="stroke2" x1="4" y1="4" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#00d1a0"/></linearGradient></defs>
-        </svg>
-      </div>
-      <div class="workflow-name-wrap">
-        <input type="text" id="workflow-name-input" class="workflow-name-input" value="Untitled Workflow" spellcheck="false" />
-        <span id="workflow-status-badge" class="status-badge badge-draft">Draft</span>
-      </div>
-    </div>
-    <div class="topnav-center">
-      <div class="autosave-indicator" id="autosave-indicator">
-        <span class="autosave-dot"></span>
-        <span id="autosave-text">Auto-saved</span>
-      </div>
-    </div>
-    <div class="topnav-right">
-      <div class="version-stamp" id="version-stamp">v1.0 · Saved just now</div>
-      <div class="nav-divider"></div>
-      <button class="btn btn-ghost btn-sm" id="export-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Export
-      </button>
-      <button class="btn btn-ghost btn-sm" id="zoom-out-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-      </button>
-      <span id="zoom-label" class="zoom-label">100%</span>
-      <button class="btn btn-ghost btn-sm" id="zoom-in-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-      </button>
-      <button class="btn btn-ghost btn-sm" id="fit-view-btn">Fit</button>
-      <div class="nav-divider"></div>
-      <button class="btn btn-secondary btn-sm" id="save-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Save
-      </button>
-      <button class="btn btn-accent btn-sm" id="preview-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Preview
-      </button>
-      <button class="btn btn-publish btn-sm" id="publish-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        Publish
-      </button>
-    </div>
-  </nav>
-
-  <!-- PUBLISHED BANNER -->
-  <div id="published-banner" class="published-banner hidden">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-    Simulated Active Mode (Demo) — This workflow is published and locked for editing.
-    <button id="unpublish-btn" class="banner-btn">Revert to Draft</button>
-  </div>
-
-  <!-- MAIN BODY -->
-  <div class="builder-body" id="builder-body">
-
-    <!-- LEFT PANEL -->
-    <aside class="left-panel" id="left-panel">
-      <div class="panel-header">
-        <span class="panel-title">Components</span>
-        <button class="panel-collapse-btn" id="collapse-left-btn" title="Collapse">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      <div class="list-header-actions">
+        <button class="btn btn-ghost" id="import-workflow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Import
         </button>
-      </div>
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="component-search" placeholder="Search nodes..." />
-      </div>
-      <div class="component-library" id="component-library">
-        <!-- Rendered by JS -->
-      </div>
-    </aside>
-
-    <!-- LEFT PANEL COLLAPSED TAB -->
-    <div class="left-panel-tab hidden" id="left-panel-tab">
-      <button id="expand-left-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-        Components
-      </button>
-    </div>
-
-    <!-- CANVAS WRAPPER -->
-    <div class="canvas-wrapper" id="canvas-wrapper">
-      <div class="canvas-container" id="canvas-container">
-        <svg class="connections-svg" id="connections-svg" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
-            </marker>
-            <marker id="arrowhead-ai" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#00d1a0" />
-            </marker>
-            <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b" />
-            </marker>
-            <filter id="ai-glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-        </svg>
-        <div class="nodes-layer" id="nodes-layer">
-          <!-- Nodes rendered by JS -->
-        </div>
-      </div>
-
-      <!-- CANVAS CONTROLS -->
-      <div class="canvas-controls">
-        <button class="canvas-ctrl-btn" id="reset-view-btn" title="Reset View">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        </button>
-        <div class="canvas-ctrl-divider"></div>
-        <span class="canvas-zoom-label" id="canvas-zoom-label">100%</span>
-      </div>
-
-      <!-- CANVAS MINI-MAP -->
-      <div class="minimap-container" id="minimap-container">
-        <canvas id="minimap-canvas" width="160" height="100"></canvas>
-        <div class="minimap-label">Map</div>
-      </div>
-
-      <!-- DROP HINT -->
-      <div class="drop-hint" id="drop-hint">
-        <div class="drop-hint-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="4 2"/><path d="M12 8v8M8 12h8"/></svg>
-        </div>
-        <p>Drag a component here to start building</p>
-        <span>or use the demo workflow to explore</span>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL -->
-    <aside class="right-panel" id="right-panel">
-      <div class="panel-header">
-        <span class="panel-title" id="right-panel-title">Properties</span>
-        <button class="panel-close-btn" id="close-right-panel-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div id="config-panel-content" class="config-panel-content">
-        <div class="config-empty-state">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".4"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
-          <p>Click a node to configure it</p>
-        </div>
-      </div>
-      <div id="validation-panel" class="validation-panel hidden">
-        <div class="validation-header">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Validation Errors
-        </div>
-        <ul id="validation-error-list"></ul>
-      </div>
-    </aside>
-  </div>
-
-  <!-- BOTTOM LOG PANEL (Preview mode) -->
-  <div id="exec-log-panel" class="exec-log-panel hidden">
-    <div class="log-panel-header">
-      <div class="log-panel-title">
-        <span class="log-dot"></span>
-        Execution Simulation Log
-      </div>
-      <div class="log-panel-actions">
-        <div class="sim-input-wrap" id="sim-input-section">
-          <label>Severity</label>
-          <select id="sim-severity">
-            <option value="minor">Minor</option>
-            <option value="moderate">Moderate</option>
-            <option value="major" selected>Major</option>
-            <option value="critical">Critical</option>
-          </select>
-          <label>Risk Score</label>
-          <input type="number" id="sim-risk-score" value="85" min="0" max="100" />
-          <button class="btn btn-accent btn-xs" id="run-simulation-btn">Run Simulation</button>
-        </div>
-        <button class="log-close-btn" id="close-log-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        <button class="btn btn-primary" id="create-workflow-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          New Workflow
         </button>
       </div>
     </div>
-    <div id="exec-log-body" class="exec-log-body">
-      <div class="log-placeholder">Press "Run Simulation" to execute the workflow.</div>
+
+    <div class="list-content">
+      <div class="list-stats">
+        <div class="stat-card">
+          <div class="stat-icon stat-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18M9 21V9" />
+            </svg></div>
+          <div>
+            <div class="stat-val" id="stat-total">0</div>
+            <div class="stat-label">Total Workflows</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg></div>
+          <div>
+            <div class="stat-val" id="stat-active">0</div>
+            <div class="stat-label">Active</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg></div>
+          <div>
+            <div class="stat-val" id="stat-draft">0</div>
+            <div class="stat-label">Drafts</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-section-title">
+        <span>Your Workflows</span>
+        <div class="list-filters">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="active">Active</button>
+          <button class="filter-btn" data-filter="draft">Draft</button>
+          <button class="filter-btn" data-filter="archived">Archived</button>
+        </div>
+      </div>
+
+      <div id="workflow-grid" class="workflow-grid">
+        <!-- Cards rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="import-file-input" accept=".json" style="display:none" />
+  </div>
+
+  <!-- ========== BUILDER VIEW ========== -->
+  <div id="builder-view" class="view">
+
+    <!-- TOP NAV -->
+    <nav class="topnav">
+      <div class="topnav-left">
+        <button class="topnav-back" id="back-to-list-btn" title="Back to Workflows">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <div class="nav-brand-mini">
+          <img src="assets/logo.svg" alt="nAI Logo" width="24" height="24" />
+        </div>
+        <div class="workflow-name-wrap">
+          <input type="text" id="workflow-name-input" class="workflow-name-input" value="Untitled Workflow"
+            spellcheck="false" />
+          <span id="workflow-status-badge" class="status-badge badge-draft">Draft</span>
+        </div>
+      </div>
+      <div class="topnav-center">
+        <div class="autosave-indicator" id="autosave-indicator">
+          <span class="autosave-dot"></span>
+          <span id="autosave-text">Auto-saved</span>
+        </div>
+      </div>
+      <div class="topnav-right">
+        <div class="version-stamp" id="version-stamp">v1.0 · Saved just now</div>
+        <div class="nav-divider"></div>
+        <button class="btn btn-ghost btn-sm" id="export-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Export
+        </button>
+        <button class="btn btn-ghost btn-sm" id="zoom-out-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </button>
+        <span id="zoom-label" class="zoom-label">100%</span>
+        <button class="btn btn-ghost btn-sm" id="zoom-in-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="11" y1="8" x2="11" y2="14" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        </button>
+        <button class="btn btn-ghost btn-sm" id="fit-view-btn">Fit</button>
+        <div class="nav-divider"></div>
+        <button class="btn btn-secondary btn-sm" id="save-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          Save
+        </button>
+        <button class="btn btn-accent btn-sm" id="preview-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          Preview
+        </button>
+        <button class="btn btn-publish btn-sm" id="publish-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
+          Publish
+        </button>
+      </div>
+    </nav>
+
+    <!-- PUBLISHED BANNER -->
+    <div id="published-banner" class="published-banner hidden">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+      </svg>
+      Simulated Active Mode (Demo) — This workflow is published and locked for editing.
+      <button id="unpublish-btn" class="banner-btn">Revert to Draft</button>
+    </div>
+
+    <!-- MAIN BODY -->
+    <div class="builder-body" id="builder-body">
+
+      <!-- LEFT PANEL -->
+      <aside class="left-panel" id="left-panel">
+        <div class="panel-header">
+          <span class="panel-title">Components</span>
+          <button class="panel-collapse-btn" id="collapse-left-btn" title="Collapse">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="component-search" placeholder="Search nodes..." />
+        </div>
+        <div class="component-library" id="component-library">
+          <!-- Rendered by JS -->
+        </div>
+      </aside>
+
+      <!-- LEFT PANEL COLLAPSED TAB -->
+      <div class="left-panel-tab hidden" id="left-panel-tab">
+        <button id="expand-left-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+          Components
+        </button>
+      </div>
+
+      <!-- CANVAS WRAPPER -->
+      <div class="canvas-wrapper" id="canvas-wrapper">
+        <div class="canvas-container" id="canvas-container">
+          <svg class="connections-svg" id="connections-svg" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+              </marker>
+              <marker id="arrowhead-ai" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#00d1a0" />
+              </marker>
+              <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b" />
+              </marker>
+              <filter id="ai-glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
+          <div class="nodes-layer" id="nodes-layer">
+            <!-- Nodes rendered by JS -->
+          </div>
+        </div>
+
+        <!-- CANVAS CONTROLS -->
+        <div class="canvas-controls">
+          <button class="canvas-ctrl-btn" id="reset-view-btn" title="Reset View">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+          </button>
+          <div class="canvas-ctrl-divider"></div>
+          <span class="canvas-zoom-label" id="canvas-zoom-label">100%</span>
+        </div>
+
+        <!-- CANVAS MINI-MAP -->
+        <div class="minimap-container" id="minimap-container">
+          <canvas id="minimap-canvas" width="160" height="100"></canvas>
+          <div class="minimap-label">Map</div>
+        </div>
+
+        <!-- DROP HINT -->
+        <div class="drop-hint" id="drop-hint">
+          <div class="drop-hint-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="4 2" />
+              <path d="M12 8v8M8 12h8" />
+            </svg>
+          </div>
+          <p>Drag a component here to start building</p>
+          <span>or use the demo workflow to explore</span>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <aside class="right-panel" id="right-panel">
+        <div class="panel-header">
+          <span class="panel-title" id="right-panel-title">Properties</span>
+          <button class="panel-close-btn" id="close-right-panel-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div id="config-panel-content" class="config-panel-content">
+          <div class="config-empty-state">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              opacity=".4">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.07 4.93A10 10 0 0 0 4.93 19.07" />
+              <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+            </svg>
+            <p>Click a node to configure it</p>
+          </div>
+        </div>
+        <div id="validation-panel" class="validation-panel hidden">
+          <div class="validation-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            Validation Errors
+          </div>
+          <ul id="validation-error-list"></ul>
+        </div>
+      </aside>
+    </div>
+
+    <!-- BOTTOM LOG PANEL (Preview mode) -->
+    <div id="exec-log-panel" class="exec-log-panel hidden">
+      <div class="log-panel-header">
+        <div class="log-panel-title">
+          <span class="log-dot"></span>
+          Execution Simulation Log
+        </div>
+        <div class="log-panel-actions">
+          <div class="sim-input-wrap" id="sim-input-section">
+            <label>Severity</label>
+            <select id="sim-severity">
+              <option value="minor">Minor</option>
+              <option value="moderate">Moderate</option>
+              <option value="major" selected>Major</option>
+              <option value="critical">Critical</option>
+            </select>
+            <label>Risk Score</label>
+            <input type="number" id="sim-risk-score" value="85" min="0" max="100" />
+            <button class="btn btn-accent btn-xs" id="run-simulation-btn">Run Simulation</button>
+          </div>
+          <button class="log-close-btn" id="close-log-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="exec-log-body" class="exec-log-body">
+        <div class="log-placeholder">Press "Run Simulation" to execute the workflow.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- MODAL OVERLAY -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div id="modal-box" class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title">Confirm</h3>
+        <button class="modal-close" id="modal-close-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg></button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" id="modal-cancel-btn">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="modal-confirm-btn">Confirm</button>
+      </div>
     </div>
   </div>
 
-</div>
-
-<!-- TOAST CONTAINER -->
-<div id="toast-container" class="toast-container"></div>
-
-<!-- MODAL OVERLAY -->
-<div id="modal-overlay" class="modal-overlay hidden">
-  <div id="modal-box" class="modal-box">
-    <div class="modal-header">
-      <h3 id="modal-title">Confirm</h3>
-      <button class="modal-close" id="modal-close-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" id="modal-cancel-btn">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="modal-confirm-btn">Confirm</button>
-    </div>
-  </div>
-</div>
-
-<script src="js/workflow-manager.js"></script>
-<script src="js/nodes.js"></script>
-<script src="js/connections.js"></script>
-<script src="js/canvas.js"></script>
-<script src="js/config-panel.js"></script>
-<script src="js/validation.js"></script>
-<script src="js/preview.js"></script>
-<script src="js/demo-workflow.js"></script>
-<script src="js/app.js"></script>
+  <script src="js/workflow-manager.js"></script>
+  <script src="js/nodes.js"></script>
+  <script src="js/connections.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/config-panel.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/preview.js"></script>
+  <script src="js/demo-workflow.js"></script>
+  <script src="js/app.js"></script>
 </body>
+
 </html>

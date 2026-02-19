@@ -437,12 +437,14 @@ body {
 .brand-icon {
   width: 42px;
   height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px var(--primary-glow);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .brand-icon svg path,
@@ -774,8 +776,15 @@ body {
 .nav-brand-mini {
   display: flex;
   align-items: center;
+  justify-content: center;
   color: var(--primary);
   flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
 }
 
 .workflow-name-wrap {
