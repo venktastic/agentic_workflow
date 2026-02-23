@@ -331,16 +331,40 @@
           Execution Simulation Log
         </div>
         <div class="log-panel-actions">
-          <div class="sim-input-wrap" id="sim-input-section">
-            <label>Severity</label>
-            <select id="sim-severity">
-              <option value="minor">Minor</option>
-              <option value="moderate">Moderate</option>
-              <option value="major" selected>Major</option>
-              <option value="critical">Critical</option>
-            </select>
-            <label>Risk Score</label>
-            <input type="number" id="sim-risk-score" value="85" min="0" max="100" />
+          <div class="sim-input-wrap" id="sim-input-section"
+            style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+            <div id="standard-sim-inputs" style="display:flex; gap:8px; align-items:center;">
+              <label>Severity</label>
+              <select id="sim-severity">
+                <option value="minor">Minor</option>
+                <option value="moderate">Moderate</option>
+                <option value="major" selected>Major</option>
+                <option value="critical">Critical</option>
+              </select>
+              <label>Risk Score</label>
+              <input type="number" id="sim-risk-score" value="85" min="0" max="100" />
+              <label>Val. Confidence %</label>
+              <input type="number" id="sim-val-conf" value="40" min="0" max="100" />
+            </div>
+            <div id="inspection-sim-inputs" style="display:none; gap:8px; align-items:center;">
+              <label>Q1 PPE:</label>
+              <select id="sim-q1">
+                <option value="0">Yes (0)</option>
+                <option value="5">Partially (5)</option>
+                <option value="10" selected>No (10)</option>
+              </select>
+              <label>Q2 Housekeeping:</label>
+              <select id="sim-q2">
+                <option value="0">Good (0)</option>
+                <option value="3">Average (3)</option>
+                <option value="8" selected>Poor (8)</option>
+              </select>
+              <label>Q3 Extinguishers:</label>
+              <select id="sim-q3">
+                <option value="0">Accessible (0)</option>
+                <option value="7" selected>Blocked (7)</option>
+              </select>
+            </div>
             <button class="btn btn-accent btn-xs" id="run-simulation-btn">Run Simulation</button>
           </div>
           <button class="log-close-btn" id="close-log-btn">

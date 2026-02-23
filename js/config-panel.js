@@ -4,18 +4,18 @@
 
 const ConfigPanel = (() => {
 
-    function show(node) {
-        const def = NodeDefs.getDef(node.type) || {};
-        const title = document.getElementById('right-panel-title');
-        const content = document.getElementById('config-panel-content');
-        const panel = document.getElementById('right-panel');
-        panel.classList.remove('collapsed');
-        title.textContent = 'Configure Node';
+  function show(node) {
+    const def = NodeDefs.getDef(node.type) || {};
+    const title = document.getElementById('right-panel-title');
+    const content = document.getElementById('config-panel-content');
+    const panel = document.getElementById('right-panel');
+    panel.classList.remove('collapsed');
+    title.textContent = 'Configure Node';
 
-        const isAI = def.isAI || node.category === 'ai';
-        const catColor = getCatColor(node.category || def.category);
+    const isAI = def.isAI || node.category === 'ai';
+    const catColor = getCatColor(node.category || def.category);
 
-        let html = `
+    let html = `
       <div class="config-node-header">
         <div class="config-node-icon" style="background:${catColor.bg};color:${catColor.color};">${def.icon || ''}</div>
         <div>
@@ -25,9 +25,9 @@ const ConfigPanel = (() => {
       </div>
     `;
 
-        html += buildFieldsHTML(node, def);
+    html += buildFieldsHTML(node, def);
 
-        html += `
+    html += `
       <div class="config-section-divider"></div>
       <div class="field-group">
         <label class="field-label">Node Label</label>
@@ -35,48 +35,48 @@ const ConfigPanel = (() => {
       </div>
     `;
 
-        content.innerHTML = html;
+    content.innerHTML = html;
 
-        // Bind changes
-        const cfg = node.config || {};
-        bindFieldEvents(node, def);
+    // Bind changes
+    const cfg = node.config || {};
+    bindFieldEvents(node, def);
 
-        // Node name change
-        const nameInput = document.getElementById('cfg-node-name');
-        if (nameInput) {
-            nameInput.addEventListener('input', () => {
-                node.name = nameInput.value;
-                const el = document.querySelector(`[data-node-id="${node.id}"] .node-title`);
-                if (el) el.textContent = node.name;
-                App.markDirty();
-            });
-        }
+    // Node name change
+    const nameInput = document.getElementById('cfg-node-name');
+    if (nameInput) {
+      nameInput.addEventListener('input', () => {
+        node.name = nameInput.value;
+        const el = document.querySelector(`[data-node-id="${node.id}"] .node-title`);
+        if (el) el.textContent = node.name;
+        App.markDirty();
+      });
+    }
+  }
+
+  function buildFieldsHTML(node, def) {
+    const cfg = node.config || {};
+    const cat = node.category || def.category || '';
+    let html = '';
+
+    if (cat === 'trigger') {
+      html += buildTriggerFields(node.type, cfg);
+    } else if (cat === 'action') {
+      html += buildActionFields(node.type, cfg);
+    } else if (cat === 'logic') {
+      html += buildLogicFields(node.type, cfg);
+    } else if (cat === 'ai') {
+      html += buildAIFields(node.type, cfg);
+    } else if (cat === 'approval') {
+      html += buildApprovalFields(node.type, cfg);
     }
 
-    function buildFieldsHTML(node, def) {
-        const cfg = node.config || {};
-        const cat = node.category || def.category || '';
-        let html = '';
+    return html;
+  }
 
-        if (cat === 'trigger') {
-            html += buildTriggerFields(node.type, cfg);
-        } else if (cat === 'action') {
-            html += buildActionFields(node.type, cfg);
-        } else if (cat === 'logic') {
-            html += buildLogicFields(node.type, cfg);
-        } else if (cat === 'ai') {
-            html += buildAIFields(node.type, cfg);
-        } else if (cat === 'approval') {
-            html += buildApprovalFields(node.type, cfg);
-        }
-
-        return html;
-    }
-
-    function buildTriggerFields(type, cfg) {
-        const schedules = ['Daily at 08:00', 'Weekly Monday', 'Monthly 1st', 'Every 6 hours'];
-        if (type === 'scheduled_trigger') {
-            return `
+  function buildTriggerFields(type, cfg) {
+    const schedules = ['Daily at 08:00', 'Weekly Monday', 'Monthly 1st', 'Every 6 hours'];
+    if (type === 'scheduled_trigger') {
+      return `
         <div class="field-group">
           <label class="field-label">Schedule</label>
           <select class="field-select" data-cfg="schedule">
@@ -91,9 +91,9 @@ const ConfigPanel = (() => {
             <option value="UTC+4">UTC+4 (Gulf)</option>
           </select>
         </div>`;
-        }
-        if (type === 'ai_risk_alert_trigger') {
-            return `
+    }
+    if (type === 'ai_risk_alert_trigger') {
+      return `
         <div class="field-group">
           <label class="field-label">Trigger Threshold</label>
           <div class="field-slider-wrap">
@@ -107,14 +107,51 @@ const ConfigPanel = (() => {
             ${['Physical', 'Chemical', 'Biological', 'Ergonomic', 'Environmental', 'Fire'].map(r => `<option value="${r}" ${cfg.riskCategory === r ? 'selected' : ''}>${r}</option>`).join('')}
           </select>
         </div>`;
-        }
-        return `<div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" data-cfg="description" placeholder="Describe trigger conditions...">${cfg.description || ''}</textarea></div>`;
     }
+    if (type === 'inspection_form_builder') {
+      const qs = cfg.questions || [];
+      let totalMaxScore = 0;
+      qs.forEach(q => {
+        let max = 0;
+        (q.options || []).forEach(o => max = Math.max(max, parseInt(o.score) || 0));
+        totalMaxScore += max;
+      });
+      return `
+        <div class="field-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+             <strong>Form Questions</strong>
+             <div class="badge-draft" style="font-size:11px; padding: 2px 6px;">Max Score: ${totalMaxScore}</div>
+          </div>
+          <div class="questions-list" id="questions-list">
+            ${qs.map((q, qIdx) => `
+              <div class="question-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                   <input type="text" class="field-input q-text-input" placeholder="Question text..." value="${escapeHtml(q.text || '')}" data-qidx="${qIdx}" style="flex:1; margin-right: 8px;" />
+                   <button class="btn btn-ghost btn-xs remove-q-btn" data-qidx="${qIdx}">X</button>
+                </div>
+                <div class="options-list" style="margin-left: 10px;">
+                  ${(q.options || []).map((o, oIdx) => `
+                    <div style="display:flex; gap: 6px; margin-bottom: 4px;">
+                      <input type="text" class="field-input o-text-input" placeholder="Option text" value="${escapeHtml(o.text || '')}" data-qidx="${qIdx}" data-oidx="${oIdx}" style="flex:1;" />
+                      <input type="number" class="field-input o-score-input" placeholder="Score" value="${o.score || 0}" data-qidx="${qIdx}" data-oidx="${oIdx}" style="width: 60px; text-align:right;" />
+                      <button class="btn btn-ghost btn-xs remove-o-btn" data-qidx="${qIdx}" data-oidx="${oIdx}">X</button>
+                    </div>
+                  `).join('')}
+                </div>
+                <button class="btn btn-ghost btn-xs add-o-btn" data-qidx="${qIdx}" style="margin-top: 6px; font-size: 11px;">+ Add Option</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn btn-secondary btn-sm" id="add-question-btn" style="width:100%; margin-top: 5px;">+ Add Question</button>
+        </div>`;
+    }
+    return `<div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" data-cfg="description" placeholder="Describe trigger conditions...">${cfg.description || ''}</textarea></div>`;
+  }
 
-    function buildActionFields(type, cfg) {
-        let html = '';
-        if (type === 'send_notification') {
-            html += `
+  function buildActionFields(type, cfg) {
+    let html = '';
+    if (type === 'send_notification') {
+      html += `
         <div class="field-group">
           <label class="field-label">Recipient Role</label>
           <select class="field-select" data-cfg="recipient">
@@ -131,8 +168,8 @@ const ConfigPanel = (() => {
             ${['Email', 'WhatsApp', 'In-App', 'SMS', 'Teams'].map(ch => `<button class="channel-chip ${(cfg.channel || '').includes(ch) ? 'active' : ''}" data-channel="${ch}">${ch}</button>`).join('')}
           </div>
         </div>`;
-        } else if (type === 'assign_task') {
-            html += `
+    } else if (type === 'assign_task') {
+      html += `
         <div class="field-group">
           <label class="field-label">Assign To Role</label>
           <select class="field-select" data-cfg="role">
@@ -147,8 +184,8 @@ const ConfigPanel = (() => {
           <label class="field-label">Due In (hours)</label>
           <input type="number" class="field-input" data-cfg="dueHours" value="${cfg.dueHours || 24}" min="1" max="720" />
         </div>`;
-        } else if (type === 'escalate_role') {
-            html += `
+    } else if (type === 'escalate_role') {
+      html += `
         <div class="field-group">
           <label class="field-label">Escalate To</label>
           <select class="field-select" data-cfg="role">
@@ -159,8 +196,8 @@ const ConfigPanel = (() => {
           <label class="field-label">Escalation Reason</label>
           <textarea class="field-textarea" data-cfg="reason" placeholder="Reason for escalation...">${cfg.reason || ''}</textarea>
         </div>`;
-        } else if (type === 'update_status') {
-            html += `
+    } else if (type === 'update_status') {
+      html += `
         <div class="field-group">
           <label class="field-label">Record Type</label>
           <select class="field-select" data-cfg="recordType">
@@ -173,17 +210,34 @@ const ConfigPanel = (() => {
             ${['Under Investigation', 'Escalated', 'Closed', 'Pending Approval', 'Archived'].map(s => `<option value="${s}" ${cfg.status === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>
         </div>`;
-        } else {
-            html += `<div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" data-cfg="description" placeholder="Describe this action...">${cfg.description || ''}</textarea></div>`;
-        }
-        return html;
+    } else if (type === 'calculate_inspection_score') {
+      html += `
+        <div class="field-group">
+          <label class="field-label">Risk Thresholds</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+             <span style="font-size:12px; color:#94a3b8;">Low Risk (0 to)</span>
+             <input type="number" class="field-input" data-cfg="thresholdLow" value="${cfg.thresholdLow || 10}" style="width: 80px;" />
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+             <span style="font-size:12px; color:#94a3b8;">Medium Risk (up to)</span>
+             <input type="number" class="field-input" data-cfg="thresholdMedium" value="${cfg.thresholdMedium || 20}" style="width: 80px;" />
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+             <span style="font-size:12px; color:#94a3b8;">High Risk</span>
+             <span style="font-size:12px; color:#fbbf24;">(Above Medium)</span>
+          </div>
+        </div>`;
+    } else {
+      html += `<div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" data-cfg="description" placeholder="Describe this action...">${cfg.description || ''}</textarea></div>`;
     }
+    return html;
+  }
 
-    function buildLogicFields(type, cfg) {
-        let html = '';
-        if (type === 'if_else') {
-            const conditions = cfg.conditions || [{ field: 'Risk Score', operator: '>', value: '75' }];
-            html += `
+  function buildLogicFields(type, cfg) {
+    let html = '';
+    if (type === 'if_else') {
+      const conditions = cfg.conditions || [{ field: 'Risk Score', operator: '>', value: '75' }];
+      html += `
         <div class="field-group">
           <label class="field-label">Conditions (AND)</label>
           <div class="conditions-list" id="conditions-list">
@@ -202,8 +256,8 @@ const ConfigPanel = (() => {
           </div>
           <button class="add-condition-btn" id="add-condition-btn">+ Add Condition</button>
         </div>`;
-        } else if (type === 'delay_timer') {
-            html += `
+    } else if (type === 'delay_timer') {
+      html += `
         <div class="field-group">
           <label class="field-label">Delay Duration</label>
           <input type="number" class="field-input" data-cfg="delay" value="${cfg.delay || 30}" min="1" />
@@ -214,8 +268,8 @@ const ConfigPanel = (() => {
             ${['minutes', 'hours', 'days'].map(u => `<option value="${u}" ${(cfg.delayUnit || 'minutes') === u ? 'selected' : ''}>${u}</option>`).join('')}
           </select>
         </div>`;
-        } else if (type === 'validation_rule') {
-            html += `
+    } else if (type === 'validation_rule') {
+      html += `
         <div class="field-group">
           <label class="field-label">Validate Field</label>
           <select class="field-select" data-cfg="field">
@@ -228,20 +282,20 @@ const ConfigPanel = (() => {
             ${['Required', 'Min Length 50', 'Must Have Attachment', 'Numeric', 'Valid Email', 'Future Date'].map(r => `<option value="${r}" ${cfg.rule === r ? 'selected' : ''}>${r}</option>`).join('')}
           </select>
         </div>`;
-        } else if (type === 'multi_branch') {
-            html += `
+    } else if (type === 'multi_branch') {
+      html += `
         <div class="field-group">
           <label class="field-label">Branch Field</label>
           <select class="field-select" data-cfg="field">
             ${['Severity', 'Category', 'Priority', 'Region', 'Status'].map(f => `<option value="${f}" ${cfg.field === f ? 'selected' : ''}>${f}</option>`).join('')}
           </select>
         </div>`;
-        }
-        return html;
     }
+    return html;
+  }
 
-    function buildAIFields(type, cfg) {
-        return `
+  function buildAIFields(type, cfg) {
+    return `
       <div class="field-group">
         <label class="field-label">Input Source</label>
         <select class="field-select" data-cfg="inputSource">
@@ -267,10 +321,10 @@ const ConfigPanel = (() => {
           ${['Escalate to Human', 'Skip Step', 'Raise Alert', 'Use Default Value'].map(f => `<option value="${f}" ${cfg.failSafe === f ? 'selected' : ''}>${f}</option>`).join('')}
         </select>
       </div>`;
-    }
+  }
 
-    function buildApprovalFields(type, cfg) {
-        let html = `
+  function buildApprovalFields(type, cfg) {
+    let html = `
       <div class="field-group">
         <label class="field-label">Approver Role</label>
         <select class="field-select" data-cfg="role">
@@ -287,109 +341,209 @@ const ConfigPanel = (() => {
           ${['Auto-Escalate', 'Send Reminder', 'Skip Approval', 'Reject Request'].map(a => `<option value="${a}" ${cfg.slaAction === a ? 'selected' : ''}>${a}</option>`).join('')}
         </select>
       </div>`;
-        if (type === 'multi_level_approval') {
-            html += `
+    if (type === 'multi_level_approval') {
+      html += `
         <div class="field-group">
           <label class="field-label">Approval Levels</label>
           <input type="number" class="field-input" data-cfg="levels" value="${cfg.levels || 2}" min="2" max="5" />
         </div>`;
-        }
-        return html;
     }
+    return html;
+  }
 
-    function bindFieldEvents(node, def) {
-        const content = document.getElementById('config-panel-content');
-        if (!content) return;
+  function bindFieldEvents(node, def) {
+    const content = document.getElementById('config-panel-content');
+    if (!content) return;
 
-        // Standard selects/inputs
-        content.querySelectorAll('[data-cfg]').forEach(el => {
-            const key = el.dataset.cfg;
-            el.addEventListener('change', () => updateCfg(node, key, el.value));
-            if (el.type === 'range') {
-                el.addEventListener('input', () => {
-                    const val = el.dataset.cfg === 'confidence' ? el.value + '%' : el.value;
-                    const span = el.parentElement.querySelector('.field-slider-val');
-                    if (span) span.textContent = val;
-                    updateCfg(node, key, parseInt(el.value));
-                });
-            }
-            if (el.tagName === 'INPUT' && el.type !== 'range') {
-                el.addEventListener('input', () => updateCfg(node, key, el.value));
-            }
-            if (el.tagName === 'TEXTAREA') {
-                el.addEventListener('input', () => updateCfg(node, key, el.value));
-            }
+    // Standard selects/inputs
+    content.querySelectorAll('[data-cfg]').forEach(el => {
+      const key = el.dataset.cfg;
+      el.addEventListener('change', () => updateCfg(node, key, el.value));
+      if (el.type === 'range') {
+        el.addEventListener('input', () => {
+          const val = el.dataset.cfg === 'confidence' ? el.value + '%' : el.value;
+          const span = el.parentElement.querySelector('.field-slider-val');
+          if (span) span.textContent = val;
+          updateCfg(node, key, parseInt(el.value));
         });
+      }
+      if (el.tagName === 'INPUT' && el.type !== 'range') {
+        el.addEventListener('input', () => updateCfg(node, key, el.value));
+      }
+      if (el.tagName === 'TEXTAREA') {
+        el.addEventListener('input', () => updateCfg(node, key, el.value));
+      }
+    });
 
-        // Channel chips
-        content.querySelectorAll('.channel-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                chip.classList.toggle('active');
-                const selected = [...content.querySelectorAll('.channel-chip.active')].map(c => c.dataset.channel).join(',');
-                updateCfg(node, 'channel', selected);
-            });
+    // Channel chips
+    content.querySelectorAll('.channel-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('active');
+        const selected = [...content.querySelectorAll('.channel-chip.active')].map(c => c.dataset.channel).join(',');
+        updateCfg(node, 'channel', selected);
+      });
+    });
+
+    // Conditions
+    const addCondBtn = content.querySelector('#add-condition-btn');
+    if (addCondBtn) {
+      addCondBtn.addEventListener('click', () => {
+        const conditions = node.config.conditions || [];
+        conditions.push({ field: 'Risk Score', operator: '>', value: '' });
+        updateCfg(node, 'conditions', conditions);
+        show(node); // Re-render
+      });
+      content.querySelectorAll('.condition-remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const conditions = node.config.conditions || [];
+          conditions.splice(parseInt(btn.dataset.idx), 1);
+          updateCfg(node, 'conditions', conditions);
+          show(node);
         });
-
-        // Conditions
-        const addCondBtn = content.querySelector('#add-condition-btn');
-        if (addCondBtn) {
-            addCondBtn.addEventListener('click', () => {
-                const conditions = node.config.conditions || [];
-                conditions.push({ field: 'Risk Score', operator: '>', value: '' });
-                updateCfg(node, 'conditions', conditions);
-                show(node); // Re-render
-            });
-            content.querySelectorAll('.condition-remove-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const conditions = node.config.conditions || [];
-                    conditions.splice(parseInt(btn.dataset.idx), 1);
-                    updateCfg(node, 'conditions', conditions);
-                    show(node);
-                });
-            });
-            // Condition field changes
-            content.querySelectorAll('[data-cfg-arr]').forEach(el => {
-                el.addEventListener('change', () => {
-                    const conditions = JSON.parse(JSON.stringify(node.config.conditions || []));
-                    const match = el.dataset.cfgArr.match(/conditions\[(\d+)\]\.(\w+)/);
-                    if (match) { conditions[parseInt(match[1])][match[2]] = el.value; updateCfg(node, 'conditions', conditions); }
-                });
-                el.addEventListener('input', () => {
-                    const conditions = JSON.parse(JSON.stringify(node.config.conditions || []));
-                    const match = el.dataset.cfgArr.match(/conditions\[(\d+)\]\.(\w+)/);
-                    if (match) { conditions[parseInt(match[1])][match[2]] = el.value; updateCfg(node, 'conditions', conditions); }
-                });
-            });
-        }
+      });
+      // Condition field changes
+      content.querySelectorAll('[data-cfg-arr]').forEach(el => {
+        el.addEventListener('change', () => {
+          const conditions = JSON.parse(JSON.stringify(node.config.conditions || []));
+          const match = el.dataset.cfgArr.match(/conditions\[(\d+)\]\.(\w+)/);
+          if (match) { conditions[parseInt(match[1])][match[2]] = el.value; updateCfg(node, 'conditions', conditions); }
+        });
+        el.addEventListener('input', () => {
+          const conditions = JSON.parse(JSON.stringify(node.config.conditions || []));
+          const match = el.dataset.cfgArr.match(/conditions\[(\d+)\]\.(\w+)/);
+          if (match) { conditions[parseInt(match[1])][match[2]] = el.value; updateCfg(node, 'conditions', conditions); }
+        });
+      });
     }
 
-    function updateCfg(node, key, value) {
-        if (!node.config) node.config = {};
-        node.config[key] = value;
-        CanvasController.updateNodeConfig(node.id, node.config);
-    }
+    // Inspection Form Builder
+    const addQBtn = content.querySelector('#add-question-btn');
+    if (addQBtn) {
+      addQBtn.addEventListener('click', () => {
+        const qs = node.config.questions || [];
+        qs.push({ text: '', options: [{ text: '', score: 0 }] });
+        updateCfg(node, 'questions', qs);
+        show(node);
+      });
+      content.querySelectorAll('.remove-q-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qs = node.config.questions || [];
+          qs.splice(parseInt(btn.dataset.qidx), 1);
+          updateCfg(node, 'questions', qs);
+          show(node);
+        });
+      });
+      content.querySelectorAll('.add-o-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qs = node.config.questions || [];
+          const qIdx = parseInt(btn.dataset.qidx);
+          if (!qs[qIdx].options) qs[qIdx].options = [];
+          qs[qIdx].options.push({ text: '', score: 0 });
+          updateCfg(node, 'questions', qs);
+          show(node);
+        });
+      });
+      content.querySelectorAll('.remove-o-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qs = node.config.questions || [];
+          const qIdx = parseInt(btn.dataset.qidx);
+          const oIdx = parseInt(btn.dataset.oidx);
+          qs[qIdx].options.splice(oIdx, 1);
+          updateCfg(node, 'questions', qs);
+          show(node);
+        });
+      });
+      content.querySelectorAll('.q-text-input').forEach(input => {
+        input.addEventListener('input', () => {
+          const qs = node.config.questions || [];
+          qs[parseInt(input.dataset.qidx)].text = input.value;
+          updateCfg(node, 'questions', qs);
+        });
+      });
+      content.querySelectorAll('.o-text-input').forEach(input => {
+        input.addEventListener('input', () => {
+          const qs = node.config.questions || [];
+          qs[parseInt(input.dataset.qidx)].options[parseInt(input.dataset.oidx)].text = input.value;
+          updateCfg(node, 'questions', qs);
+        });
+      });
+      content.querySelectorAll('.o-score-input').forEach(input => {
+        input.addEventListener('input', () => {
+          const qs = node.config.questions || [];
+          qs[parseInt(input.dataset.qidx)].options[parseInt(input.dataset.oidx)].score = parseInt(input.value) || 0;
+          updateCfg(node, 'questions', qs);
+        });
+      });
 
-    function clear() {
-        const content = document.getElementById('config-panel-content');
-        content.innerHTML = `<div class="config-empty-state">
+      // Basic drag and drop for question cards
+      let dragged = null;
+      content.querySelectorAll('.question-card').forEach(card => {
+        card.draggable = true;
+        card.style.cursor = 'grab';
+        card.addEventListener('dragstart', (e) => {
+          dragged = card;
+          e.dataTransfer.effectAllowed = 'move';
+          card.style.opacity = 0.5;
+        });
+        card.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          return false;
+        });
+        card.addEventListener('dragenter', (e) => {
+          e.preventDefault();
+          card.style.border = '1px solid #60a5fa';
+        });
+        card.addEventListener('dragleave', (e) => {
+          card.style.border = '1px solid rgba(255,255,255,0.1)';
+        });
+        card.addEventListener('drop', (e) => {
+          e.stopPropagation();
+          card.style.border = '1px solid rgba(255,255,255,0.1)';
+          if (dragged !== card) {
+            const fromIdx = parseInt(dragged.querySelector('.remove-q-btn').dataset.qidx);
+            const toIdx = parseInt(card.querySelector('.remove-q-btn').dataset.qidx);
+            const qs = node.config.questions || [];
+            const item = qs.splice(fromIdx, 1)[0];
+            qs.splice(toIdx, 0, item);
+            updateCfg(node, 'questions', qs);
+            show(node);
+          }
+          return false;
+        });
+        card.addEventListener('dragend', () => {
+          card.style.opacity = 1;
+        });
+      });
+    }
+  }
+
+  function updateCfg(node, key, value) {
+    if (!node.config) node.config = {};
+    node.config[key] = value;
+    CanvasController.updateNodeConfig(node.id, node.config);
+  }
+
+  function clear() {
+    const content = document.getElementById('config-panel-content');
+    content.innerHTML = `<div class="config-empty-state">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".4"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
       <p>Click a node to configure it</p>
     </div>`;
-        document.getElementById('right-panel-title').textContent = 'Properties';
-    }
+    document.getElementById('right-panel-title').textContent = 'Properties';
+  }
 
-    function getCatColor(cat) {
-        const map = {
-            trigger: { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
-            action: { bg: 'rgba(100,116,139,0.15)', color: '#93c5fd' },
-            logic: { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24' },
-            ai: { bg: 'rgba(0,209,160,0.15)', color: '#00d1a0' },
-            approval: { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa' },
-        };
-        return map[cat] || map['action'];
-    }
+  function getCatColor(cat) {
+    const map = {
+      trigger: { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
+      action: { bg: 'rgba(100,116,139,0.15)', color: '#93c5fd' },
+      logic: { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24' },
+      ai: { bg: 'rgba(0,209,160,0.15)', color: '#00d1a0' },
+      approval: { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa' },
+    };
+    return map[cat] || map['action'];
+  }
 
-    function escapeHtml(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function escapeHtml(str) { return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
-    return { show, clear };
+  return { show, clear };
 })();

@@ -91,9 +91,70 @@ const DemoWorkflow = (() => {
         };
     }
 
+    // 4. CONFIGURABLE SAFETY INSPECTION
+    function getInspectionDemo() {
+        return {
+            id: 'wf_demo_configurable_inspection',
+            name: 'Configurable Safety Inspection with Risk Scoring',
+            status: 'active',
+            version: '2.0',
+            description: 'Demonstrate how an Admin can create configurable inspection forms with risk scoring that drives automated routing logic.',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            nodes: [
+                {
+                    id: 'insp_trig_01', type: 'inspection_form_builder', name: 'Inspection Form Builder', category: 'trigger', x: 60, y: 150, config: {
+                        questions: [
+                            { text: 'Is proper PPE being worn?', options: [{ text: 'Yes', score: 0 }, { text: 'Partially', score: 5 }, { text: 'No', score: 10 }] },
+                            { text: 'Is housekeeping satisfactory?', options: [{ text: 'Good', score: 0 }, { text: 'Average', score: 3 }, { text: 'Poor', score: 8 }] },
+                            { text: 'Are fire extinguishers accessible?', options: [{ text: 'Accessible', score: 0 }, { text: 'Blocked', score: 7 }] }
+                        ]
+                    }
+                },
+                { id: 'insp_calc_01', type: 'calculate_inspection_score', name: 'Calculate Inspection Score', category: 'action', x: 380, y: 150, config: { thresholdLow: 10, thresholdMedium: 20 } },
+
+                { id: 'insp_if_high', type: 'if_else', name: 'Total Score > 20?', category: 'logic', x: 700, y: 150, config: { conditions: [{ field: 'Total Score', operator: '>', value: '20' }] } },
+
+                // HIGH RISK BRANCH
+                { id: 'insp_act_high_1', type: 'assign_task', name: 'Assign: HSE Manager', category: 'action', x: 1000, y: -20, config: { role: 'HSE Manager', taskTitle: 'Critical Inspection Failure' } },
+                { id: 'insp_act_high_2', type: 'send_notification', name: 'Notify Project Director', category: 'action', x: 1300, y: -20, config: { recipient: 'Project Director', message: 'High Risk Hazard identified.' } },
+                { id: 'insp_act_high_3', type: 'sla_escalation', name: 'SLA Escalation (24h)', category: 'approval', x: 1600, y: -20, config: { slaHours: 24, escalateTo: 'Corporate HSE Director' } },
+
+                // MEDIUM RISK (IF FALSE -> CHECK IF > 10)
+                { id: 'insp_if_med', type: 'if_else', name: 'Total Score > 10?', category: 'logic', x: 1000, y: 150, config: { conditions: [{ field: 'Total Score', operator: '>', value: '10' }] } },
+
+                // MEDIUM RISK BRANCH
+                { id: 'insp_act_med_1', type: 'assign_task', name: 'Assign to Contractor Supervisor', category: 'action', x: 1300, y: 150, config: { role: 'Contractor Supervisor' } },
+                { id: 'insp_act_med_2', type: 'send_notification', name: 'Notify Area Supervisor', category: 'action', x: 1600, y: 150, config: { recipient: 'Area Supervisor', message: 'Medium risk findings from inspection.' } },
+
+                // LOW RISK BRANCH
+                { id: 'insp_act_low_1', type: 'update_status', name: 'Auto Close', category: 'action', x: 1300, y: 320, config: { status: 'Closed' } },
+            ],
+            connections: [
+                { id: 'c_insp_01', from: 'insp_trig_01', fromHandle: 'default', to: 'insp_calc_01', toHandle: 'input' },
+                { id: 'c_insp_02', from: 'insp_calc_01', fromHandle: 'default', to: 'insp_if_high', toHandle: 'input' },
+
+                // High Risk Routing
+                { id: 'c_insp_03', from: 'insp_if_high', fromHandle: 'branch-if', to: 'insp_act_high_1', toHandle: 'input' },
+                { id: 'c_insp_04', from: 'insp_act_high_1', fromHandle: 'default', to: 'insp_act_high_2', toHandle: 'input' },
+                { id: 'c_insp_05', from: 'insp_act_high_2', fromHandle: 'default', to: 'insp_act_high_3', toHandle: 'input' },
+
+                // Medium / Low Logic Check
+                { id: 'c_insp_06', from: 'insp_if_high', fromHandle: 'branch-else', to: 'insp_if_med', toHandle: 'input' },
+
+                // Medium
+                { id: 'c_insp_07', from: 'insp_if_med', fromHandle: 'branch-if', to: 'insp_act_med_1', toHandle: 'input' },
+                { id: 'c_insp_08', from: 'insp_act_med_1', fromHandle: 'default', to: 'insp_act_med_2', toHandle: 'input' },
+
+                // Low
+                { id: 'c_insp_12', from: 'insp_if_med', fromHandle: 'branch-else', to: 'insp_act_low_1', toHandle: 'input' }
+            ]
+        };
+    }
+
     function ensureDemo() {
         const all = WorkflowManager.getAllWorkflows();
-        const demos = [getIncidentDemo(), getObservationDemo(), getPTWDemo()];
+        const demos = [getInspectionDemo(), getIncidentDemo(), getObservationDemo(), getPTWDemo()];
 
         // Add each demo if it doesn't exist
         demos.forEach(demo => {
@@ -103,5 +164,5 @@ const DemoWorkflow = (() => {
         });
     }
 
-    return { getIncidentDemo, getObservationDemo, getPTWDemo, ensureDemo };
+    return { getInspectionDemo, getIncidentDemo, getObservationDemo, getPTWDemo, ensureDemo };
 })();

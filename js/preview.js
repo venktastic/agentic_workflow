@@ -12,6 +12,16 @@ const PreviewMode = (() => {
         document.getElementById('preview-btn').textContent = 'Stop Preview';
         document.getElementById('preview-btn').classList.add('btn-accent');
         document.getElementById('builder-body').style.pointerEvents = 'auto';
+
+        // Show inspection inputs if workflow has form builder
+        const hasForm = CanvasController.getNodes().some(n => n.type === 'inspection_form_builder');
+        if (document.getElementById('standard-sim-inputs')) {
+            document.getElementById('standard-sim-inputs').style.display = hasForm ? 'none' : 'flex';
+        }
+        if (document.getElementById('inspection-sim-inputs')) {
+            document.getElementById('inspection-sim-inputs').style.display = hasForm ? 'flex' : 'none';
+        }
+
         clearLog();
         Toast.show('Preview mode active — run simulation below', 'info');
     }
@@ -39,6 +49,14 @@ const PreviewMode = (() => {
         const connections = Connections.getConnections();
         const severity = document.getElementById('sim-severity').value;
         const riskScore = parseInt(document.getElementById('sim-risk-score').value) || 85;
+        const valConfEl = document.getElementById('sim-val-conf');
+        const validationConfidence = valConfEl ? (parseInt(valConfEl.value) || 40) : 40;
+
+        // Form scores
+        const q1 = parseInt(document.getElementById('sim-q1') ? document.getElementById('sim-q1').value : 0) || 0;
+        const q2 = parseInt(document.getElementById('sim-q2') ? document.getElementById('sim-q2').value : 0) || 0;
+        const q3 = parseInt(document.getElementById('sim-q3') ? document.getElementById('sim-q3').value : 0) || 0;
+        const totalInspectionScore = q1 + q2 + q3;
 
         clearLog();
 
@@ -79,7 +97,7 @@ const PreviewMode = (() => {
                 await delay(500);
 
                 // Process node
-                const result = processNode(node, { severity, riskScore });
+                const result = processNode(node, { severity, riskScore, totalInspectionScore });
                 appendLog(result.logType, result.message, result.detail, step++);
                 await delay(400);
                 highlightNode(node.id, 'active');
@@ -96,6 +114,16 @@ const PreviewMode = (() => {
                             if (cond.operator === '>' && riskScore > parseInt(cond.value || 0)) condMet = true;
                             if (cond.operator === '<' && riskScore < parseInt(cond.value || 100)) condMet = true;
                             if (cond.operator === '=' && riskScore === parseInt(cond.value || 0)) condMet = true;
+                        }
+                        if (cond.field === 'Total Score') {
+                            if (cond.operator === '>' && totalInspectionScore > parseInt(cond.value || 0)) condMet = true;
+                            if (cond.operator === '<' && totalInspectionScore < parseInt(cond.value || 0)) condMet = true;
+                            if (cond.operator === '=' && totalInspectionScore === parseInt(cond.value || 0)) condMet = true;
+                        }
+                        if (cond.field === 'Validation Confidence') {
+                            if (cond.operator === '>' && validationConfidence > parseInt(cond.value || 0)) condMet = true;
+                            if (cond.operator === '<' && validationConfidence < parseInt(cond.value || 100)) condMet = true;
+                            if (cond.operator === '=' && validationConfidence === parseInt(cond.value || 0)) condMet = true;
                         }
                         if (cond.field === 'Severity') {
                             const sev = { minor: 1, moderate: 2, major: 3, critical: 4 };
@@ -131,6 +159,16 @@ const PreviewMode = (() => {
     function processNode(node, simData) {
         const cat = node.category || '';
         const cfg = node.config || {};
+        if (node.type === 'inspection_form_builder') {
+            return { logType: 'trigger', message: `${node.name} executed`, detail: `Answers submitted — Computing evaluation.` };
+        }
+        if (node.type === 'calculate_inspection_score') {
+            const sum = simData.totalInspectionScore;
+            let risk = 'High';
+            if (sum <= (cfg.thresholdLow || 10)) risk = 'Low';
+            else if (sum <= (cfg.thresholdMedium || 20)) risk = 'Medium';
+            return { logType: 'success', message: `${node.name} completed`, detail: `Calculated Score: ${sum} — Risk: ${risk}` };
+        }
         if (cat === 'ai') {
             return { logType: 'ai', message: `${node.name} executed`, detail: `Analyzed input — confidence: ${cfg.confidence || 80}% — Output: ${cfg.outputMap || 'Risk Score'}` };
         }

@@ -43,6 +43,7 @@ const NodeDefs = (() => {
                 { type: 'observation_raised', name: 'Observation Raised', subtitle: 'Safety observation logged', icon: ICONS.eye, category: 'trigger' },
                 { type: 'incident_logged', name: 'Incident Logged', subtitle: 'HSE incident recorded', icon: ICONS.warning, category: 'trigger' },
                 { type: 'scheduled_trigger', name: 'Scheduled Trigger', subtitle: 'Time-based execution', icon: ICONS.clock, category: 'trigger' },
+                { type: 'inspection_form_builder', name: 'Inspection Form Builder', subtitle: 'Dynamic scored form', icon: ICONS.form, category: 'trigger' },
                 { type: 'ai_risk_alert_trigger', name: 'AI Risk Alert Trigger', subtitle: 'AI-detected risk event', icon: ICONS.aiAlert, category: 'trigger', isAI: true },
             ]
         },
@@ -57,6 +58,7 @@ const NodeDefs = (() => {
                 { type: 'generate_report', name: 'Generate Report', subtitle: 'Auto-generate HSE report', icon: ICONS.report, category: 'action' },
                 { type: 'create_ptw', name: 'Create PTW', subtitle: 'Issue Permit to Work', icon: ICONS.permit, category: 'action' },
                 { type: 'create_observation', name: 'Create Observation', subtitle: 'Log new observation', icon: ICONS.observe, category: 'action' },
+                { type: 'calculate_inspection_score', name: 'Calculate Inspection Score', subtitle: 'Calculate total form score', icon: ICONS.check, category: 'action' },
             ]
         },
         {
